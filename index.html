@@ -1,0 +1,330 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>FC27 Pack Opener</title>
+    <script src="https://telegram.org/js/telegram-web-app.js"></script>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        body { background-color: #0b0f19; color: #ffffff; font-family: system-ui, -apple-system, sans-serif; user-select: none; }
+        .card-gold { background: linear-gradient(135deg, #d4af37 0%, #aa7c11 50%, #f3e5ab 100%); color: #1a1a1a; }
+        .card-totw { background: linear-gradient(135deg, #1f2937 0%, #111827 60%, #eab308 100%); color: #fde047; border: 1px solid #eab308; }
+        .card-common { background: linear-gradient(135deg, #64748b 0%, #334155 100%); color: #f8fafc; }
+        .pitch { background: repeating-linear-gradient(0deg, #15803d, #15803d 35px, #166534 35px, #166534 70px); border: 2px solid rgba(255,255,255,0.3); }
+    </style>
+</head>
+<body class="pb-20">
+
+    <!-- Верхняя панель профиля -->
+    <header class="bg-slate-900 border-b border-slate-800 p-3 sticky top-0 z-20 flex justify-between items-center">
+        <div class="flex items-center gap-2">
+            <div class="w-9 h-9 rounded-full bg-emerald-600 flex items-center justify-center font-bold text-sm">FC27</div>
+            <div>
+                <div id="username" class="text-sm font-bold leading-none">Игрок</div>
+                <div class="text-xs text-slate-400 mt-1">Рейтинг состава: <span id="squad-ovr" class="text-emerald-400 font-bold">0</span></div>
+            </div>
+        </div>
+        <div class="flex gap-3 bg-slate-800 px-3 py-1.5 rounded-lg border border-slate-700">
+            <div class="text-xs font-bold text-yellow-400">🪙 <span id="coins">5000</span></div>
+            <div class="text-xs font-bold text-cyan-400">💎 <span id="gems">50</span></div>
+        </div>
+    </header>
+
+    <!-- Вкладка 1: ПАКИ И СОБЫТИЯ -->
+    <main id="tab-packs" class="p-4 space-y-4">
+        <!-- Баннер события -->
+        <div class="bg-gradient-to-r from-indigo-900 via-purple-900 to-slate-900 p-4 rounded-xl border border-purple-500/40 relative overflow-hidden">
+            <span class="bg-purple-600 text-[10px] font-bold px-2 py-0.5 rounded uppercase">Событие недели (TOTW)</span>
+            <h2 class="text-lg font-extrabold mt-1">Команда Недели FC27</h2>
+            <p class="text-xs text-slate-300 mt-0.5">Повышенный шанс выбить карточки с рейтингом 88+ в Премиум паках!</p>
+        </div>
+
+        <h3 class="text-sm font-bold uppercase text-slate-400 tracking-wider">Магазин паков</h3>
+        
+        <div class="grid grid-cols-1 gap-3">
+            <!-- Обычный пак -->
+            <div class="bg-slate-800/80 border border-slate-700 rounded-xl p-4 flex justify-between items-center">
+                <div class="flex items-center gap-3">
+                    <div class="w-12 h-16 rounded card-common flex items-center justify-center font-black text-xs shadow-lg">75+</div>
+                    <div>
+                        <div class="font-bold">Обычный пак</div>
+                        <div class="text-xs text-slate-400">Базовые игроки (Рейтинг 75–82)</div>
+                    </div>
+                </div>
+                <button onclick="openPack('common', 500)" class="bg-slate-700 hover:bg-slate-600 px-4 py-2 rounded-lg font-bold text-xs text-yellow-400">
+                    🪙 500
+                </button>
+            </div>
+
+            <!-- Золотой пак -->
+            <div class="bg-slate-800/80 border border-yellow-600/40 rounded-xl p-4 flex justify-between items-center">
+                <div class="flex items-center gap-3">
+                    <div class="w-12 h-16 rounded card-gold flex items-center justify-center font-black text-xs shadow-lg">82+</div>
+                    <div>
+                        <div class="font-bold text-yellow-400">Золотой пак</div>
+                        <div class="text-xs text-slate-400">Редкие игроки + шанс на TOTW</div>
+                    </div>
+                </div>
+                <button onclick="openPack('gold', 1500)" class="bg-yellow-600 hover:bg-yellow-500 text-black px-4 py-2 rounded-lg font-bold text-xs">
+                    🪙 1500
+                </button>
+            </div>
+
+            <!-- Премиум пак -->
+            <div class="bg-slate-800/80 border border-purple-500/50 rounded-xl p-4 flex justify-between items-center">
+                <div class="flex items-center gap-3">
+                    <div class="w-12 h-16 rounded card-totw flex items-center justify-center font-black text-xs shadow-lg">86+</div>
+                    <div>
+                        <div class="font-bold text-purple-300">Премиум Событие</div>
+                        <div class="text-xs text-slate-400">Гарантированный игрок 86+</div>
+                    </div>
+                </div>
+                <button onclick="openPack('premium', 3000)" class="bg-purple-600 hover:bg-purple-500 px-4 py-2 rounded-lg font-bold text-xs">
+                    🪙 3000
+                </button>
+            </div>
+        </div>
+    </main>
+
+    <!-- Вкладка 2: СОСТАВ И КОЛЛЕКЦИЯ -->
+    <main id="tab-squad" class="p-4 hidden space-y-4">
+        <div class="flex justify-between items-center">
+            <h2 class="font-bold text-base">Мой стартовый состав</h2>
+            <span class="text-xs text-slate-400">Нажми на слот для замены</span>
+        </div>
+
+        <!-- Футбольное поле (4 слота для демо: НАП, ПЗ, ЗАЩ, ВРТ) -->
+        <div class="pitch rounded-xl p-4 h-80 flex flex-col justify-between items-center relative">
+            <div id="slot-ST" onclick="assignCard('ST')" class="w-20 h-28 rounded-lg border-2 border-dashed border-white/50 flex flex-col items-center justify-center cursor-pointer bg-black/20 text-xs font-bold">ST (НАП)</div>
+            <div id="slot-CM" onclick="assignCard('CM')" class="w-20 h-28 rounded-lg border-2 border-dashed border-white/50 flex flex-col items-center justify-center cursor-pointer bg-black/20 text-xs font-bold">CM (ПЗ)</div>
+            <div class="flex gap-8">
+                <div id="slot-CB" onclick="assignCard('CB')" class="w-20 h-28 rounded-lg border-2 border-dashed border-white/50 flex flex-col items-center justify-center cursor-pointer bg-black/20 text-xs font-bold">CB (ЗАЩ)</div>
+                <div id="slot-GK" onclick="assignCard('GK')" class="w-20 h-28 rounded-lg border-2 border-dashed border-white/50 flex flex-col items-center justify-center cursor-pointer bg-black/20 text-xs font-bold">GK (ВРТ)</div>
+            </div>
+        </div>
+
+        <h3 class="text-sm font-bold uppercase text-slate-400">Инвентарь (<span id="inv-count">0</span>)</h3>
+        <div id="inventory-list" class="grid grid-cols-3 gap-2"></div>
+    </main>
+
+    <!-- Вкладка 3: ДРАФТ (Испытание дня) -->
+    <main id="tab-draft" class="p-4 hidden space-y-4">
+        <div class="bg-slate-800 border border-emerald-500/40 p-4 rounded-xl">
+            <span class="text-[10px] bg-emerald-600 px-2 py-0.5 rounded font-bold uppercase">Испытание дня</span>
+            <h2 class="font-bold text-base mt-1">Драфт: Мадридское дерби</h2>
+            <p class="text-xs text-slate-300 mt-1">Собери драфт из 5 случайных игроков так, чтобы минимум <b>2 игрока были из Real Madrid</b>.</p>
+            <div class="mt-3 flex justify-between items-center text-xs">
+                <span>Прогресс Real Madrid: <b id="draft-cond" class="text-emerald-400">0 / 2</b></span>
+                <span>Пиков сделано: <b id="draft-picks">0 / 5</b></span>
+            </div>
+        </div>
+
+        <button id="btn-start-draft" onclick="nextDraftPick()" class="w-full bg-emerald-600 hover:bg-emerald-500 py-3 rounded-xl font-bold text-sm">
+            Сделать выбор игрока (Пик)
+        </button>
+
+        <div id="draft-choices" class="grid grid-cols-3 gap-2 hidden"></div>
+        <h3 class="text-xs font-bold uppercase text-slate-400">Собранный драфт:</h3>
+        <div id="draft-pool" class="grid grid-cols-3 gap-2"></div>
+    </main>
+
+    <!-- Вкладка 4: АДМИН-ПАНЕЛЬ -->
+    <main id="tab-admin" class="p-4 hidden space-y-4">
+        <h2 class="font-bold text-base text-rose-400">Панель администратора</h2>
+        <div class="bg-slate-800 p-4 rounded-xl space-y-3 border border-slate-700">
+            <h3 class="text-xs font-bold uppercase text-slate-400">Добавить карточку FC27 в пул</h3>
+            <input id="adm-name" type="text" placeholder="Имя (напр. Mbappé)" class="w-full bg-slate-900 border border-slate-700 rounded p-2 text-sm">
+            <div class="grid grid-cols-2 gap-2">
+                <input id="adm-ovr" type="number" placeholder="Рейтинг (91)" class="bg-slate-900 border border-slate-700 rounded p-2 text-sm">
+                <select id="adm-pos" class="bg-slate-900 border border-slate-700 rounded p-2 text-sm">
+                    <option value="ST">ST (Нападающий)</option>
+                    <option value="CM">CM (Полузащитник)</option>
+                    <option value="CB">CB (Защитник)</option>
+                    <option value="GK">GK (Вратарь)</option>
+                </select>
+            </div>
+            <div class="grid grid-cols-2 gap-2">
+                <input id="adm-club" type="text" placeholder="Клуб (Real Madrid)" class="bg-slate-900 border border-slate-700 rounded p-2 text-sm">
+                <select id="adm-rarity" class="bg-slate-900 border border-slate-700 rounded p-2 text-sm">
+                    <option value="common">Обычная</option>
+                    <option value="gold">Золотая</option>
+                    <option value="totw">Событие (TOTW)</option>
+                </select>
+            </div>
+            <button onclick="addCustomCard()" class="w-full bg-rose-600 hover:bg-rose-500 py-2 rounded-lg font-bold text-sm">
+                Сохранить карточку в игру
+            </button>
+        </div>
+    </main>
+
+    <!-- Модальное окно открытия пака -->
+    <div id="pack-modal" class="fixed inset-0 bg-black/90 hidden items-center justify-center z-50 p-4 flex-col">
+        <div class="text-xs uppercase tracking-widest text-slate-400 mb-3">Выпал игрок!</div>
+        <div id="pack-card-result" class="w-44 h-60 rounded-xl p-3 flex flex-col justify-between shadow-2xl transform scale-105 transition"></div>
+        <button onclick="closePackModal()" class="mt-6 bg-emerald-600 px-8 py-2.5 rounded-xl font-bold text-sm">Забрать в клуб</button>
+    </div>
+
+    <!-- Нижнее меню навигации -->
+    <nav class="fixed bottom-0 left-0 right-0 bg-slate-900 border-t border-slate-800 flex justify-around py-2.5 z-30 text-xs font-medium">
+        <button onclick="switchTab('packs')" class="flex flex-col items-center text-emerald-400" id="nav-packs">📦<span>Паки</span></button>
+        <button onclick="switchTab('squad')" class="flex flex-col items-center text-slate-400" id="nav-squad">⚽<span>Состав</span></button>
+        <button onclick="switchTab('draft')" class="flex flex-col items-center text-slate-400" id="nav-draft">🎯<span>Драфт</span></button>
+        <button onclick="switchTab('admin')" class="flex flex-col items-center text-slate-400" id="nav-admin">⚙️<span>Админ</span></button>
+    </nav>
+
+    <script>
+        const tg = window.Telegram.WebApp;
+        tg.expand();
+        if (tg.initDataUnsafe?.user?.first_name) {
+            document.getElementById('username').innerText = tg.initDataUnsafe.user.first_name;
+        }
+
+        let coins = 5000;
+        let inventory = [];
+        let squad = { ST: null, CM: null, CB: null, GK: null };
+        let draftPool = [];
+
+        // База карточек FC27 по умолчанию
+        let cardDatabase = [
+            { name: "Mbappé", ovr: 92, pos: "ST", club: "Real Madrid", rarity: "totw" },
+            { name: "Bellingham", ovr: 91, pos: "CM", club: "Real Madrid", rarity: "totw" },
+            { name: "Yamal", ovr: 89, pos: "ST", club: "Barcelona", rarity: "gold" },
+            { name: "Saliba", ovr: 88, pos: "CB", club: "Arsenal", rarity: "gold" },
+            { name: "Courtois", ovr: 89, pos: "GK", club: "Real Madrid", rarity: "gold" },
+            { name: "Mainoo", ovr: 81, pos: "CM", club: "Man United", rarity: "common" },
+            { name: "Endrick", ovr: 80, pos: "ST", club: "Real Madrid", rarity: "common" },
+            { name: "Cubarsí", ovr: 81, pos: "CB", club: "Barcelona", rarity: "common" },
+            { name: "Lunin", ovr: 82, pos: "GK", club: "Real Madrid", rarity: "common" }
+        ];
+
+        function getRarityClass(rarity) {
+            if (rarity === 'totw') return 'card-totw';
+            if (rarity === 'gold') return 'card-gold';
+            return 'card-common';
+        }
+
+        function renderCardHTML(card) {
+            return `
+                <div class="flex justify-between items-start">
+                    <div class="leading-none">
+                        <div class="text-xl font-black">${card.ovr}</div>
+                        <div class="text-[10px] font-bold">${card.pos}</div>
+                    </div>
+                    <div class="text-[9px] font-bold px-1.5 py-0.5 rounded bg-black/20">${card.club}</div>
+                </div>
+                <div class="text-center my-auto font-extrabold text-sm truncate">${card.name}</div>
+                <div class="text-[9px] text-center opacity-75 uppercase font-bold">FC27 • ${card.rarity}</div>
+            `;
+        }
+
+        function openPack(type, price) {
+            if (coins < price) return alert("Недостаточно монет!");
+            coins -= price;
+            document.getElementById('coins').innerText = coins;
+
+            let pool = cardDatabase;
+            if (type === 'common') pool = cardDatabase.filter(c => c.ovr <= 83);
+            if (type === 'gold') pool = cardDatabase.filter(c => c.ovr >= 80);
+            if (type === 'premium') pool = cardDatabase.filter(c => c.ovr >= 88);
+            if (pool.length === 0) pool = cardDatabase;
+
+            const dropped = pool[Math.floor(Math.random() * pool.length)];
+            inventory.push(dropped);
+            updateInventoryUI();
+
+            const modal = document.getElementById('pack-modal');
+            const cardEl = document.getElementById('pack-card-result');
+            cardEl.className = `w-44 h-60 rounded-xl p-3 flex flex-col justify-between shadow-2xl ${getRarityClass(dropped.rarity)}`;
+            cardEl.innerHTML = renderCardHTML(dropped);
+            modal.classList.remove('hidden');
+            modal.classList.add('flex');
+        }
+
+        function closePackModal() {
+            document.getElementById('pack-modal').classList.add('hidden');
+            document.getElementById('pack-modal').classList.remove('flex');
+        }
+
+        function updateInventoryUI() {
+            document.getElementById('inv-count').innerText = inventory.length;
+            const list = document.getElementById('inventory-list');
+            list.innerHTML = inventory.map(c => `
+                <div class="h-28 rounded-lg p-2 flex flex-col justify-between ${getRarityClass(c.rarity)}">
+                    ${renderCardHTML(c)}
+                </div>
+            `).join('');
+        }
+
+        function assignCard(pos) {
+            const bestForPos = inventory.filter(c => c.pos === pos).sort((a,b) => b.ovr - a.ovr)[0];
+            if (!bestForPos) return alert(`В клубе нет игрока на позицию ${pos}! Открой паки.`);
+            squad[pos] = bestForPos;
+            const slotEl = document.getElementById(`slot-${pos}`);
+            slotEl.className = `w-20 h-28 rounded-lg p-1.5 flex flex-col justify-between cursor-pointer ${getRarityClass(bestForPos.rarity)}`;
+            slotEl.innerHTML = renderCardHTML(bestForPos);
+            
+            const activeCards = Object.values(squad).filter(Boolean);
+            const avg = Math.round(activeCards.reduce((s, c) => s + c.ovr, 0) / activeCards.length);
+            document.getElementById('squad-ovr').innerText = avg || 0;
+        }
+
+        function nextDraftPick() {
+            if (draftPool.length >= 5) return alert("Драфт уже собран!");
+            const choicesDiv = document.getElementById('draft-choices');
+            choicesDiv.classList.remove('hidden');
+            const options = [...cardDatabase].sort(() => 0.5 - Math.random()).slice(0, 3);
+            choicesDiv.innerHTML = options.map((c, idx) => `
+                <div onclick='selectDraftCard(${JSON.stringify(c)})' class="h-28 rounded-lg p-2 flex flex-col justify-between cursor-pointer ring-2 ring-emerald-400 ${getRarityClass(c.rarity)}">
+                    ${renderCardHTML(c)}
+                </div>
+            `).join('');
+        }
+
+        function selectDraftCard(card) {
+            draftPool.push(card);
+            document.getElementById('draft-choices').classList.add('hidden');
+            document.getElementById('draft-picks').innerText = `${draftPool.length} / 5`;
+            const rmCount = draftPool.filter(c => c.club.toLowerCase().includes('real madrid')).length;
+            document.getElementById('draft-cond').innerText = `${rmCount} / 2`;
+
+            document.getElementById('draft-pool').innerHTML = draftPool.map(c => `
+                <div class="h-28 rounded-lg p-2 flex flex-col justify-between ${getRarityClass(c.rarity)}">
+                    ${renderCardHTML(c)}
+                </div>
+            `).join('');
+
+            if (draftPool.length === 5) {
+                if (rmCount >= 2) {
+                    coins += 2500;
+                    document.getElementById('coins').innerText = coins;
+                    alert("Испытание Драфта выполнено! Награда: +2500 монет!");
+                } else {
+                    alert("Драфт завершен, но условие (2 игрока Real Madrid) не выполнено. Попробуй снова!");
+                }
+                draftPool = [];
+            }
+        }
+
+        function addCustomCard() {
+            const name = document.getElementById('adm-name').value.trim();
+            const ovr = parseInt(document.getElementById('adm-ovr').value);
+            const pos = document.getElementById('adm-pos').value;
+            const club = document.getElementById('adm-club').value.trim();
+            const rarity = document.getElementById('adm-rarity').value;
+            if (!name || !ovr || !club) return alert("Заполни все поля карточки!");
+            cardDatabase.push({ name, ovr, pos, club, rarity });
+            alert(`Карточка ${name} (${ovr}) добавлена в паки!`);
+        }
+
+        function switchTab(tab) {
+            ['packs', 'squad', 'draft', 'admin'].forEach(t => {
+                document.getElementById(`tab-${t}`).classList.add('hidden');
+                document.getElementById(`nav-${t}`).classList.replace('text-emerald-400', 'text-slate-400');
+            });
+            document.getElementById(`tab-${tab}`).classList.remove('hidden');
+            document.getElementById(`nav-${tab}`).classList.replace('text-slate-400', 'text-emerald-400');
+        }
+    </script>
+</body>
+</html>
